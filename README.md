@@ -2,7 +2,7 @@
 Geo Location with Microsoft Api's
 
 >>Create Yours developer account on microsoft platform
->>Included Key woulb be work for 28 days
+>>Included Key would be work for 28 days
 
 Used Developer Key
 
