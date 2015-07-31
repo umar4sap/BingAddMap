@@ -1,0 +1,341 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <title>Address and Location </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style type="text/css">
+        body {
+            font-family: Verdana;
+            font-size: 10px;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            margin-left: -1px;
+            margin-top: -1px;
+        }
+        #controls
+        {
+            position:absolute;
+            top:50px;
+            left:10px;
+            min-width:170px;
+            min-height:270px;
+            background-color:#faf7f5;
+            z-index:10000;
+            vertical-align:middle;
+            font-size:11px;
+            border: 3px #BDBDBD solid;
+            padding: 5px;
+        }
+        .input
+        {
+            margin-top: 3px;
+            margin-bottom: 3px;
+            display:block;
+            clear: both;
+        }
+        .pinDetail {
+            display:block;
+            clear: both;
+            font-size:11px;
+        }
+        .button {
+            margin-bottom: 15px;
+        }
+    </style>
+
+
+    <script type="text/javascript" src="https://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0&amp;s=1"></script>
+
+    <!-- We include JQuery from the Microsoft Ajax CDN to assist with our 'Updated' forms attribute values access -->
+    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.2.min.js"></script>
+
+    <script type="text/javascript">
+
+        // Global variables:
+        var map = null;
+        var pushpin;
+        var infobox = null;
+        var revgeoPushpin = null;
+        var crmFormType;
+
+        // Initiate map:
+
+
+        // Mohammad Umar's Key Put yours developer key
+
+        function GetMap() {
+            map = new Microsoft.Maps.Map(document.getElementById("mapDiv"), {
+                credentials: "ucjShYC7rHmgPdclMICd~6r7h0q45ANkwfEUQmvrqag~Ar1xxrNCwdUSBzG1zdHK4YL_f7eIQEC3LRz3kDlLR_zLgv18pKYK0OtzN2o0L6I3",
+                zoom: 3, center: new Microsoft.Maps.Location(40.347, -94.218),
+                mapTypeId: Microsoft.Maps.MapTypeId.birdseye
+            });
+
+            // extend pushpin class to hold geocoding data:
+            Microsoft.Maps.Pushpin.prototype.geoname = null;
+            Microsoft.Maps.Pushpin.prototype.geoentitytype = null;
+            Microsoft.Maps.Pushpin.prototype.geoaddress = null;
+            Microsoft.Maps.Pushpin.prototype.geoconfidence = null;
+            Microsoft.Maps.Pushpin.prototype.geomatchcodes = null;
+            Microsoft.Maps.Pushpin.prototype.geocalculationmethod = null;
+            Microsoft.Maps.Pushpin.prototype.geopindragged = null;
+            Microsoft.Maps.Pushpin.prototype.geoaddressrevgeo = null;
+
+            crmFormType = parent.Xrm.Page.ui.getFormType();
+
+        }
+
+        // pushpin drag handler flags the pushpin as having been dragged
+        function dragHandler(e) {
+            hideInfoBox();
+            e.entity.geopindragged = true;
+        }
+
+
+            map.entities.clear();
+
+
+
+
+
+        function geocodeAddress() {
+            map.entities.clear();
+            map.getCredentials(callGeocodeService);
+        }
+
+        // call geocoding service with user-entered location details:
+        function callGeocodeService(credentials) {
+            var searchRequest = 'https://dev.virtualearth.net/REST/v1/Locations/' +
+                    document.getElementById("txtWhere").value +
+                    '?output=json&jsonp=geocodeServiceCallback&key=' + credentials;
+            var mapscript = document.createElement('script');
+            mapscript.type = 'text/javascript';
+            mapscript.src = searchRequest;
+            document.getElementById('mapDiv').appendChild(mapscript);
+        }
+
+        // call reverse-geocoding service with current pushpin location:
+
+
+        // Callback for REST Locations request:
+        function revgeoServiceCallback(result) {
+
+            if (result &&
+                    result.resourceSets &&
+                    result.resourceSets.length > 0 &&
+                    result.resourceSets[0].resources &&
+                    result.resourceSets[0].resources.length > 0) {
+                // Take only first result:
+                var revgeoResult = result.resourceSets[0].resources[0];
+                var location = new Microsoft.Maps.Location(revgeoResult.point.coordinates[0], revgeoResult.point.coordinates[1]);
+
+                // get calculation method:
+                var calculationMethod = getCalcMethod(revgeoResult);
+
+                // Add geocoding metadata to appropriate pin:
+                revgeoPushpin.geoname = revgeoResult.name;
+                revgeoPushpin.geoentitytype = revgeoResult.entityType;
+                revgeoPushpin.geoaddress = revgeoResult.address;
+                revgeoPushpin.geoconfidence = revgeoResult.confidence;
+                revgeoPushpin.geomatchcodes = revgeoResult.matchCodes;
+                revgeoPushpin.geocalculationmethod = calculationMethod;
+                revgeoPushpin.geoaddressrevgeo = true;
+
+
+                // Open infobox for revgeo pin:
+                showInfoBox(revgeoPushpin);
+            }
+            else {
+                if (result && result.errorDetails) {
+                    alert("Message :" + response.errorDetails[0]);
+                }
+                alert("No results for the query");
+            }
+        }
+
+        // Callback for REST Locations request:
+        function geocodeServiceCallback(result) {
+
+            if (result &&result.resourceSets &&
+                    result.resourceSets.length > 0 &&
+                    result.resourceSets[0].resources &&
+                    result.resourceSets[0].resources.length > 0) {
+                var results = result.resourceSets[0].resources;
+                var locationArray = new Array();
+                for (var j = 0; j < results.length; j++) {
+
+                    var location = new Microsoft.Maps.Location(results[j].point.coordinates[0],
+                            results[j].point.coordinates[1]);
+                    var pushpin = createPushpin(location, (j + 1).toString());
+
+                    // get calculation method:
+                    var calculationMethod = getCalcMethod(results[j]);
+
+                    // Add geocoding metadata to pin:
+                    pushpin.geoname = results[j].name;
+                    pushpin.geoentitytype = results[j].entityType;
+                    pushpin.geoaddress = results[j].address;
+                    pushpin.geoconfidence = results[j].confidence;
+                    pushpin.geomatchcodes = results[j].matchCodes;
+                    pushpin.geocalculationmethod = calculationMethod;
+                    pushpin.geopindragged = false;
+                    pushpin.geoaddressrevgeo = false;
+
+                    // Add pin to map:
+                    map.entities.push(pushpin);
+
+                    // Add location to array for map auto-scaling:
+                    locationArray.push(location);
+                }
+
+                // Set view depending on whether result is unique or not:
+                if (results.length == 1) {
+                    var bbox = results[0].bbox;
+                    var viewBoundaries = Microsoft.Maps.LocationRect.fromCorners(new Microsoft.Maps.Location(bbox[0], bbox[1]),
+                            new Microsoft.Maps.Location(bbox[2], bbox[3]));
+                    map.setView({ bounds: viewBoundaries });
+                } else {
+                    // Show a best view for all locations
+                    var viewBoundaries = Microsoft.Maps.LocationRect.fromLocations(locationArray);
+                    map.setView({ bounds: viewBoundaries, padding: 75 });
+                }
+                // Open infobox for top result:
+                showInfoBox(map.entities.get(0));
+            }
+            else {
+                if (result && result.errorDetails) {
+                    alert("Message :" + response.errorDetails[0]);
+                }
+                alert("No results for the query");
+            }
+        }
+
+        // obtain calculation method from a location result:
+        function getCalcMethod(result) {
+
+            // Identify the calculation method for our display point:
+            var calculationMethod = "";
+            if (result.geocodePoints && result.geocodePoints.length != null) {
+                // loop through to find the calculation method for the geocodePoint of type 'Display':
+                for (var k = 0; k < result.geocodePoints.length; k++) {
+                    if (result.geocodePoints[k].usageTypes.toString().match(/Display/)) {
+                        calculationMethod = result.geocodePoints[k].calculationMethod;
+                    }
+                }
+            }
+            return calculationMethod;
+
+        }
+
+        // Create pushpin with appropriate options and event handlers:
+        function createPushpin(location, label) {
+            var pushpin = new Microsoft.Maps.Pushpin(location, { draggable: true, text: label });
+            var pushpinclick = Microsoft.Maps.Events.addHandler(pushpin, 'click', pinClickHandler);
+            var pushpindragend = Microsoft.Maps.Events.addHandler(pushpin, 'drag', dragHandler);
+            return pushpin;
+        }
+
+        // hide any existing info boxes:
+        function hideInfoBox() {
+            //Hide existing infoboxes
+            try {
+                infobox.setOptions({ visible: false });
+            }
+            catch (err) {
+            }
+        }
+
+        // Show infobox for a specific pushpin:
+        function showInfoBox(pushpin) {
+
+            //Hide other infoboxes
+            hideInfoBox();
+
+            // Get pushpin location:
+            var pinLocation = pushpin.getLocation();
+
+            // Create the info box content for the pushpin
+            var description = ""
+
+            // Determine infobox height based on specific pieces of content:
+            var infoboxHeight = 180;
+            infoboxHeight += (Math.max(0, (Math.ceil(pushpin.geoname.length / 25) - 1))) * 18;
+            if (pushpin.geopindragged) infoboxHeight += 15;
+            if (pushpin.geoaddressrevgeo) infoboxHeight += 15;
+
+            infobox = new Microsoft.Maps.Infobox(pinLocation, { title: pushpin.geoname, description: description, offset: new Microsoft.Maps.Point(7, 25), visible: true, zIndex: 1000, height: infoboxHeight });
+            infobox.setOptions({
+                actions: [
+                    {
+                        label: "Zoom",
+                        eventHandler: function (mouseEvent) {
+                            // Zoom to pin location:
+                            map.setView({ zoom: 17, center: pinLocation });
+                        }
+                    },
+                    {
+                        label: "Reverse Geocode",
+                        eventHandler: function (mouseEvent) {
+
+                            // initiate reverse geocode:
+                            revgeoPushpin = pushpin;
+                            map.getCredentials(callReverseGeocodeService);
+
+                        }
+                    },
+                    {
+                        label: "Populate Form",
+                        eventHandler: function (mouseEvent) {
+
+
+
+                            // If using 'Classic Forms' (not the Read-Only forms of type 11):
+                            if (crmFormType != 11) {
+                                var controls = parent.Xrm.Page.ui.controls;
+                                controls.get("address1_latitude").getAttribute().setValue(pinLocation.latitude ? pinLocation.latitude : "");
+                                controls.get("address1_longitude").getAttribute().setValue(pinLocation.longitude ? pinLocation.longitude : "");
+                                controls.get("address1_line1").getAttribute().setValue(pushpin.geoaddress.addressLine ? pushpin.geoaddress.addressLine : "");
+                                controls.get("address1_city").getAttribute().setValue(pushpin.geoaddress.locality ? pushpin.geoaddress.locality : "");
+                                controls.get("address1_stateorprovince").getAttribute().setValue(pushpin.geoaddress.adminDistrict ? pushpin.geoaddress.adminDistrict : "");
+                                controls.get("address1_postalcode").getAttribute().setValue(pushpin.geoaddress.postalCode ? pushpin.geoaddress.postalCode : "");
+                                controls.get("address1_country").getAttribute().setValue(pushpin.geoaddress.countryRegion ? pushpin.geoaddress.countryRegion : "");
+                            }
+                        }
+                    }
+                ]
+            });
+
+            map.entities.push(infobox);
+        }
+
+        // obtain clicked pushpin, and open infobox:
+        function pinClickHandler(e) {
+            if (e.targetType = "pushpin") {
+                //Hide other infoboxes
+
+                hideInfoBox();
+                // open infobox for target pushpin:
+
+                showInfoBox(e.target);
+            }
+        }
+
+
+
+
+
+    </script>
+</head>
+<body onload="GetMap();">
+<div id='mapDiv' style="position:absolute; width:100%; height:100%;"></div>
+<div id="controls">
+    <div class="input"><h2>Geocode Tools</h2></div>
+    <div class="input"><b>Geocode Address:</b></div>
+    <div class="input"><input id="txtWhere" type="text" size="20" /></div>
+    <div class="input"><input id="GeocodeButton" type="button" value="Go" onclick="geocodeAddress()" class="button" /></div>
+
+</div>
+</body>
+</html>
