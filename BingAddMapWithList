@@ -49,6 +49,7 @@
 </head>
 <body class="container">
 <div class="row">
+
     <div class="col-md-12">
         <div class="row">
             <div class="col-md-4">
@@ -57,23 +58,16 @@
 
 
                     <ul class="list-group" id="txtWhere" onclick="geocodeAddress()" >
-                        <li class="list-group-item list-group-item-success" >Mumbai</li>
-                        <li class="list-group-item list-group-item-info" >Hyderabad</li>
-                        <li class="list-group-item list-group-item-warning" >Dehli</li>
-                        <li class="list-group-item list-group-item-danger" >Chennai</li>
-                        <li class="list-group-item list-group-item-success" >Mumbai</li>
-                        <li class="list-group-item list-group-item-info" >Hyderabad</li>
-                        <li class="list-group-item list-group-item-warning" >Dehli</li>
-                        <li class="list-group-item list-group-item-danger" >Chennai</li>
-                        <li class="list-group-item list-group-item-success" >Mumbai</li>
-                        <li class="list-group-item list-group-item-info" >Hyderabad</li>
-                        <li class="list-group-item list-group-item-warning" >Dehli</li>
-                        <li class="list-group-item list-group-item-danger" >Chennai</li>
-                        <li class="list-group-item list-group-item-success" >Mumbai</li>
-                        <li class="list-group-item list-group-item-info" >Hyderabad</li>
-                        <li class="list-group-item list-group-item-warning" >Dehli</li>
-                        <li class="list-group-item list-group-item-danger" >Chennai</li>
-                        <li class="list-group-item list-group-item-success" >Mumbai</li>
+                        <li class="list-group-item list-group-item-success" >Kukatpally Hyderabad</li>
+						 <li class="list-group-item list-group-item-success" >Hitec City Hyderabad</li>
+						 <li class="list-group-item list-group-item-success" >Tajmahal Agra</li>
+						 <li class="list-group-item list-group-item-success" >Taj Hotel Mumbai</li>
+						  <li class="list-group-item list-group-item-success" >Hawrah kolkatta</li>
+						  <li class="list-group-item list-group-item-success" >Electric city Bangalore</li>
+						   <li class="list-group-item list-group-item-success" >Hotel taj Goa</li>
+						   <li class="list-group-item list-group-item-success" >Kashmir</li>
+						   <li class="list-group-item list-group-item-success" >sealink Mumbai</li>
+                       
                     </ul>
                 </div>
             </div>
@@ -83,6 +77,7 @@
         </div>
         </div>
     </div>
+	
 </div>
 
 
