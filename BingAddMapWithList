@@ -6,7 +6,8 @@
     <title>Address and Location </title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style type="text/css">
-
+        #mapArea
+        { position : relative; margin:10px 10px 10px 0px; width:700px; height:900px; border:1px solid #000; }
         #controls
         {
 
@@ -50,7 +51,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div id="controls" class="col-md-12">
 
 
@@ -60,12 +61,26 @@
                         <li class="list-group-item list-group-item-info" >Hyderabad</li>
                         <li class="list-group-item list-group-item-warning" >Dehli</li>
                         <li class="list-group-item list-group-item-danger" >Chennai</li>
+                        <li class="list-group-item list-group-item-success" >Mumbai</li>
+                        <li class="list-group-item list-group-item-info" >Hyderabad</li>
+                        <li class="list-group-item list-group-item-warning" >Dehli</li>
+                        <li class="list-group-item list-group-item-danger" >Chennai</li>
+                        <li class="list-group-item list-group-item-success" >Mumbai</li>
+                        <li class="list-group-item list-group-item-info" >Hyderabad</li>
+                        <li class="list-group-item list-group-item-warning" >Dehli</li>
+                        <li class="list-group-item list-group-item-danger" >Chennai</li>
+                        <li class="list-group-item list-group-item-success" >Mumbai</li>
+                        <li class="list-group-item list-group-item-info" >Hyderabad</li>
+                        <li class="list-group-item list-group-item-warning" >Dehli</li>
+                        <li class="list-group-item list-group-item-danger" >Chennai</li>
+                        <li class="list-group-item list-group-item-success" >Mumbai</li>
                     </ul>
                 </div>
             </div>
+<div id="mapArea"  class="col-md-8">
+            <div id='mapDiv' ></div>
 
-                <div id='mapDiv' class="col-md-6" ></div>
-
+        </div>
         </div>
     </div>
 </div>
